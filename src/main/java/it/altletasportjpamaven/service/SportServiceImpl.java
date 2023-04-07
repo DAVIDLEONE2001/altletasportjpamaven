@@ -142,4 +142,42 @@ public class SportServiceImpl implements SportService {
 		}
 	}
 
+	@Override
+	public List<Sport> trovaSportConErrori() throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+		try {
+
+			sportDAO.setEntityManager(entityManager);
+			return sportDAO.trovaErrori();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			throw e;
+
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+	
+	@Override
+	public int sommaMedaglieDiAtletiConAlmenoUnoSportChiuso() throws Exception {
+
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+		
+		try {
+			
+			sportDAO.setEntityManager(entityManager);
+			return sportDAO.numMedDiAtletiConSportChiusi();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+		
+		
+	}
+
 }

@@ -3,6 +3,7 @@ package it.altletasportjpamaven.dao;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import it.altletasportjpamaven.model.Atleta;
 
@@ -63,5 +64,16 @@ public class AtletaDAOImpl implements AtletaDAO {
 		this.entityManager = entityManager;
 
 	}
+
+	@Override
+	public Atleta caricaSingoloElementoConSport(Long id) throws Exception {
+		TypedQuery<Atleta> query = entityManager
+				.createQuery("select u FROM Atleta u left join fetch u.sports r where u.id = :idAtleta", Atleta.class);
+		query.setParameter("idAtleta", id);
+		return query.getResultList().stream().findFirst().orElse(null);
+	}
+
+
+	
 
 }

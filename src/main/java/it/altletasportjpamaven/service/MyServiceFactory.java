@@ -22,7 +22,7 @@ public class MyServiceFactory {
 			ATLETA_SERVICE_INSTANCE = new AtletaServiceImpl();
 
 		ATLETA_SERVICE_INSTANCE.setAtletaDAO(MyDAOFactory.getAtletaDAOInstance());
-//		ATLETA_SERVICE_INSTANCE.setUtenteDAO(MyDAOFactory.getUtenteDAOInstance());
+		ATLETA_SERVICE_INSTANCE.setSportDAO(MyDAOFactory.getSportDAOInstance());
 		return ATLETA_SERVICE_INSTANCE;
 	}
 

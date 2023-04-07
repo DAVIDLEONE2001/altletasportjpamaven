@@ -2,7 +2,7 @@ package it.altletasportjpamaven.service;
 
 import java.util.List;
 
-public interface IBaseService <T> {
+public interface IBaseService<T> {
 
 	public List<T> listAll() throws Exception;
 
@@ -14,5 +14,4 @@ public interface IBaseService <T> {
 
 	public void rimuovi(Long id) throws Exception;
 
-	
 }

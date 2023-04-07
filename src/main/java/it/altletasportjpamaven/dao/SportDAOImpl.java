@@ -42,9 +42,9 @@ public class SportDAOImpl implements SportDAO {
 		if (o == null) {
 			throw new Exception("Problema valore in input");
 		}
-		
+
 		entityManager.persist(o);
-		
+
 	}
 
 	@Override
@@ -53,10 +53,9 @@ public class SportDAOImpl implements SportDAO {
 		if (o == null) {
 			throw new Exception("Problema valore in input");
 		}
-		
+
 		entityManager.remove(entityManager.merge(o));
-		
-		
+
 	}
 
 	@Override
@@ -68,14 +67,31 @@ public class SportDAOImpl implements SportDAO {
 
 	@Override
 	public Sport cercaPerDescrizione(String descrizione) throws Exception {
-		
-		TypedQuery<Sport> query = entityManager
-				.createQuery("select s from Sport s where s.definizione=?1", Sport.class)
+
+		TypedQuery<Sport> query = entityManager.createQuery("select s from Sport s where s.definizione=?1", Sport.class)
 				.setParameter(1, descrizione);
-		
 
 		return query.getResultStream().findFirst().orElse(null);
-		
+
+	}
+
+	@Override
+	public List<Sport> trovaErrori() throws Exception {
+
+		return entityManager
+				.createQuery("select s from Sport s where s.dataFine is not null and s.dataInizio>s.dataFine",
+						Sport.class)
+				.getResultList();
+
+	}
+
+	public int numMedDiAtletiConSportChiusi() throws Exception {
+
+		String jpql = "SELECT SUM(a.numeroMedaglieVinte) FROM Atleta a JOIN a.sports s WHERE s.dataFine IS NOT NULL";
+		TypedQuery<Long> query = entityManager.createQuery(jpql, Long.class);
+		Long sum = query.getSingleResult();
+		int result = sum != null ? sum.intValue() : 0;
+		return result;
 	}
 
 }
