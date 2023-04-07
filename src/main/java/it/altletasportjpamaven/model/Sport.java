@@ -68,6 +68,18 @@ public class Sport {
 	public void setDataFine(LocalDate dataFine) {
 		this.dataFine = dataFine;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Sport other = (Sport) obj;
+		return Objects.equals(id, other.id);
+	}
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);

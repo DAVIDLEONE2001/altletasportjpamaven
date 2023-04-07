@@ -31,7 +31,7 @@ public class TestAltletaSportJPAMaven {
 //			testDeleteSport(sportServiceIstance);
 //			testUpdateSport(sportServiceIstance);
 //			testTrovaSportConErrori(sportServiceIstance);
-			testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso(atletaServiceIstance, sportServiceIstance);
+//			testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso(atletaServiceIstance, sportServiceIstance);
 
 			System.out.println("Nella tabella sport ci sono " + sportServiceIstance.listAll().size() + " elementi");
 
@@ -88,24 +88,20 @@ public class TestAltletaSportJPAMaven {
 
 	private static void testInsertSport(SportService sportServiceIstance) throws Exception {
 
-		System.out.println("***********INIZIO TEST testUpdateSport************");
+		System.out.println("***********INIZIO TEST testInsertSport************");
 
-		List<Sport> presentiSulDb = sportServiceIstance.listAll();
-
-		Sport sport = new Sport("Pallavolo", LocalDate.now(), null);
+		Sport sport = new Sport("SportProva", LocalDate.now(), null);
 
 		sportServiceIstance.inserisciNuovo(sport);
 
-		List<Sport> presentiSulDbDopoInsert = sportServiceIstance.listAll();
+		if (sport.getId() == null) {
 
-		if (presentiSulDbDopoInsert.size() <= presentiSulDb.size()) {
-
-			throw new RuntimeException("****************TEST FAILED testUpdateSport: Sport non aggiunto**********");
+			throw new RuntimeException("****************TEST FAILED testInsertSport: Sport non aggiunto**********");
 
 		}
 		sportServiceIstance.rimuovi(sport.getId());
 
-		System.out.println("***********FINE TEST testUpdateSport: PASSED************");
+		System.out.println("***********FINE TEST testInsertSport: PASSED************");
 
 	}
 
@@ -158,13 +154,13 @@ public class TestAltletaSportJPAMaven {
 
 		if (presentiSulDbErrors.size() == 0) {
 
-			throw new RuntimeException("****************TEST FAILED testTrovaSportConErrori**********");
+			throw new RuntimeException(
+					"****************TEST FAILED testTrovaSportConErrori: errori non trovati**********");
 
 		}
 
 		for (Sport sportItem : presentiSulDbErrors) {
 
-			System.out.println("id:" + sportItem.getId());
 			sportServiceIstance.rimuovi(sportItem.getId());
 		}
 
@@ -180,24 +176,20 @@ public class TestAltletaSportJPAMaven {
 
 	private static void testInsertAtleta(AtletaService atletaServiceIstance) throws Exception {
 
-		System.out.println("***********INIZIO TEST testUpdateSport************");
-
-		List<Atleta> presentiSulDb = atletaServiceIstance.listAll();
+		System.out.println("***********INIZIO TEST testInsertAtleta************");
 
 		Atleta atleta = new Atleta("Mario", "Toscano", "MRTSCN01", 0, LocalDate.parse("1992-05-06"));
 
 		atletaServiceIstance.inserisciNuovo(atleta);
 
-		List<Atleta> presentiSulDbDopoInsert = atletaServiceIstance.listAll();
+		if (atleta.getId() == null) {
 
-		if (presentiSulDbDopoInsert.size() <= presentiSulDb.size()) {
-
-			throw new RuntimeException("****************TEST FAILED testUpdateSport: Sport non aggiunto**********");
+			throw new RuntimeException("****************TEST FAILED testInsertAtleta: Atleta non aggiunto**********");
 
 		}
 		atletaServiceIstance.rimuovi(atleta.getId());
 
-		System.out.println("***********FINE TEST testUpdateSport: PASSED************");
+		System.out.println("***********FINE TEST testInsertAtleta: PASSED************");
 
 	}
 
@@ -308,7 +300,7 @@ public class TestAltletaSportJPAMaven {
 		if (atletaReloaded.getSports().size() != 0) {
 
 			throw new RuntimeException(
-					"****************TEST FAILED testDissasociaAtletaConSport: Atleta e sport non collegati**********");
+					"****************TEST FAILED testDissasociaAtletaConSport: Atleta e sport non scollegati**********");
 
 		}
 
@@ -316,31 +308,42 @@ public class TestAltletaSportJPAMaven {
 
 	}
 
-
 	private static void testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso(AtletaService atletaServiceIstance,
 			SportService sportServiceIstance) throws Exception {
 
-		System.out.println("***********INIZIO TEST testUnisciAtletaConSport************");
+		System.out.println("***********INIZIO TEST testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso************");
 
 		Sport sportEsistenteSulDb = sportServiceIstance.cercaPerDescrizione("Nuoto");
 
 		if (sportEsistenteSulDb == null) {
 			throw new RuntimeException(
-					"****************TEST FAILED testUnisciAtletaConSport: Sport non trovato**********");
+					"****************TEST FAILED testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso: Sport non trovato**********");
 		}
 		sportEsistenteSulDb.setDataFine(LocalDate.now());
 		sportServiceIstance.aggiorna(sportEsistenteSulDb);
 
+		// mi assicuro di liberare lo sport da eventuali atleti gia presenti cosi da
+		// poter sapere certamente il numero di medaglie
+		List<Atleta> presentiSulDb = atletaServiceIstance.listAll();
+		for (Atleta atletaItem : presentiSulDb) {
+			Atleta atletaTemp = atletaServiceIstance.caricaSingoloElementoConSport(atletaItem.getId());
+			if (atletaTemp.getSports().contains(sportEsistenteSulDb)) {
+				atletaServiceIstance.rimuoviSport(atletaItem.getId(), sportEsistenteSulDb.getId());
+			}
+		}
+
 		Atleta nuovoAtleta = new Atleta("Luigi", "Toscano", "LGTSCN01", 10, LocalDate.parse("1992-05-06"));
 		Atleta nuovoAtleta2 = new Atleta("Jamal", "Fuscio", "JMLFSC01", 10, LocalDate.parse("1992-05-06"));
+
+		// int sommaMedaglie
 
 		atletaServiceIstance.inserisciNuovo(nuovoAtleta);
 		atletaServiceIstance.inserisciNuovo(nuovoAtleta2);
 
-		if (nuovoAtleta.getId() == null) {
+		if (nuovoAtleta.getId() == null || nuovoAtleta2.getId() == null) {
 
 			throw new RuntimeException(
-					"****************TEST FAILED testUnisciAtletaConSport: Atleta non inserito**********");
+					"****************TEST FAILED testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso: Atleti non inseriti**********");
 
 		}
 
@@ -352,11 +355,16 @@ public class TestAltletaSportJPAMaven {
 		if (medaglieVeterani != 20) {
 
 			throw new RuntimeException(
-					"****************TEST FAILED testUnisciAtletaConSport: Atleta e sport non collegati**********");
+					"****************TEST FAILED testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso: Medaglie non congruenti**********");
 
 		}
 
-		System.out.println("***********FINE TEST testUnisciAtletaConSport: PASSED************");
+		atletaServiceIstance.rimuoviSport(nuovoAtleta.getId(), sportEsistenteSulDb.getId());
+		atletaServiceIstance.rimuoviSport(nuovoAtleta2.getId(), sportEsistenteSulDb.getId());
+		atletaServiceIstance.rimuovi(nuovoAtleta.getId());
+		atletaServiceIstance.rimuovi(nuovoAtleta2.getId());
+
+		System.out.println("***********FINE TEST testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso: PASSED************");
 
 	}
 
