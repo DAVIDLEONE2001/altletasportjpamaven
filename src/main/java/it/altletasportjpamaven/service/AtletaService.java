@@ -13,6 +13,7 @@ public interface AtletaService extends IBaseService<Atleta> {
 	public void aggiungiSport(Atleta atleta, Sport sportIstance);
 	public Atleta caricaSingoloElementoConSport(Long id) throws Exception;
 	public void rimuoviSport(Long IdAtleta, Long IdSport) throws Exception;
+	public void rimuoviAtletaConSport(Long IdAtleta) throws Exception;
 	
 
 	

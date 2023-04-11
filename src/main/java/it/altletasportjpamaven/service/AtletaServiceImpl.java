@@ -1,5 +1,6 @@
 package it.altletasportjpamaven.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -164,13 +165,13 @@ public class AtletaServiceImpl implements AtletaService {
 		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
-		
+
 	}
 
 	@Override
 	public void setSportDAO(SportDAO sportDAO) {
 		this.sportDAO = sportDAO;
-		
+
 	}
 
 	@Override
@@ -222,9 +223,38 @@ public class AtletaServiceImpl implements AtletaService {
 		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
-		
+
 	}
 
+	@Override
+	public void rimuoviAtletaConSport(Long IdAtleta) throws Exception {
 
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+
+			entityManager.getTransaction().begin();
+
+			atletaDAO.setEntityManager(entityManager);
+			sportDAO.setEntityManager(entityManager);
+
+			Atleta atletaEsistente = atletaDAO.caricaSingoloElementoConSport(IdAtleta);
+			List<Sport> sportEsistenti = atletaEsistente.getSports();
+			if (sportEsistenti.size() > 0) {
+				List<Sport> sportVuoti = new ArrayList<>();
+				atletaEsistente.setSports(sportVuoti);
+			}
+			atletaDAO.delete(atletaEsistente);
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+
+	}
 
 }

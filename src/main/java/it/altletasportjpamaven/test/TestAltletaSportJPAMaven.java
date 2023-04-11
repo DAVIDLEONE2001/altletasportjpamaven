@@ -14,8 +14,7 @@ public class TestAltletaSportJPAMaven {
 
 	public static void main(String[] args) throws Exception {
 
-//		SportDAO sportDAOIstance= MyDAOFactory.getSportDAOInstance();
-//		AtletaDAO atletaDAOIstance = MyDAOFactory.getAtletaDAOInstance();
+
 		SportService sportServiceIstance = MyServiceFactory.getSportServiceInstance();
 		AtletaService atletaServiceIstance = MyServiceFactory.getAtletaServiceInstance();
 
@@ -47,6 +46,7 @@ public class TestAltletaSportJPAMaven {
 //			testUpdateAtleta(atletaServiceIstance);
 //			testUnisciAtletaConSport(atletaServiceIstance, sportServiceIstance);
 //			testDissasociaAtletaConSport(atletaServiceIstance, sportServiceIstance);
+			TestRimuoviAtletaConSport(atletaServiceIstance, sportServiceIstance);
 
 			System.out.println("Nella tabella atleta ci sono " + atletaServiceIstance.listAll().size() + " elementi");
 
@@ -365,6 +365,60 @@ public class TestAltletaSportJPAMaven {
 		atletaServiceIstance.rimuovi(nuovoAtleta2.getId());
 
 		System.out.println("***********FINE TEST testSommaMedaglieDiAtletiConAlmenoUnoSportChiuso: PASSED************");
+
+	}
+	
+	private static void TestRimuoviAtletaConSport(AtletaService atletaServiceIstance,
+			SportService sportServiceIstance) throws Exception {
+
+		System.out.println("***********INIZIO TEST testDissasociaAtletaConSport************");
+
+		Sport sportEsistenteSulDb = sportServiceIstance.cercaPerDescrizione("Pallavolo");
+
+		if (sportEsistenteSulDb == null) {
+			throw new RuntimeException(
+					"****************TEST FAILED testDissasociaAtletaConSport: Sport non trovato**********");
+		}
+
+		Atleta nuovoAtleta = new Atleta("Luigi", "Toscano", "LGTSCN01", 0, LocalDate.parse("1992-05-06"));
+
+		atletaServiceIstance.inserisciNuovo(nuovoAtleta);
+		
+		int presentiSulDbDopoInsert = atletaServiceIstance.listAll().size();
+
+		if (nuovoAtleta.getId() == null) {
+
+			throw new RuntimeException(
+					"****************TEST FAILED testDissasociaAtletaConSport: Atleta non inserito**********");
+
+		}
+
+		atletaServiceIstance.aggiungiSport(nuovoAtleta, sportEsistenteSulDb);
+
+		Atleta atletaReloaded = atletaServiceIstance.caricaSingoloElementoConSport(nuovoAtleta.getId());
+		if (atletaReloaded.getSports().size() < 1) {
+
+			throw new RuntimeException(
+					"****************TEST FAILED testDissasociaAtletaConSport: Atleta e sport non collegati**********");
+
+		}
+
+//		atletaServiceIstance.rimuoviSport(nuovoAtleta.getId(), sportEsistenteSulDb.getId());
+
+//		atletaReloaded = atletaServiceIstance.caricaSingoloElementoConSport(nuovoAtleta.getId());
+		
+		atletaServiceIstance.rimuoviAtletaConSport(nuovoAtleta.getId());
+		
+		int presentiSulDbDopoDelete = atletaServiceIstance.listAll().size();
+
+		if (presentiSulDbDopoDelete>=presentiSulDbDopoInsert) {
+
+			throw new RuntimeException(
+					"****************TEST FAILED testDissasociaAtletaConSport: Atleta e sport non scollegati**********");
+
+		}
+
+		System.out.println("***********FINE TEST testDissasociaAtletaConSport: PASSED************");
 
 	}
 
